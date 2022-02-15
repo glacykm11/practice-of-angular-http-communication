@@ -1,3 +1,4 @@
+import { OldBook } from 'app/models/oldBook';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
@@ -24,6 +25,11 @@ export class EditBookComponent implements OnInit {
       (err: any) => console.log(err),
       () => console.log('All complete returning selected book')
     )
+
+    this.dataService.getOldBookById(bookID)
+     .subscribe(
+       (data: OldBook) => console.log(`Old book title: ${data.bookTitle}`)
+     )
   }
 
   setMostPopular(): void {
@@ -31,6 +37,10 @@ export class EditBookComponent implements OnInit {
   }
 
   saveChanges(): void {
-    console.warn('Save changes to book not yet implemented.');
+    this.dataService.updateBook(this.selectedBook)
+    .subscribe(
+      (data: void) => console.log(`${this.selectedBook} updated successfully.`),
+      (err: any) => console.log (err)
+    )
   }
 }

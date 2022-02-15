@@ -33,25 +33,32 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "AddBookComponent": () => (/* binding */ AddBookComponent)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! tslib */ 4762);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 4762);
 /* harmony import */ var _raw_loader_add_book_component_html__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !raw-loader!./add-book.component.html */ 7052);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 7716);
+/* harmony import */ var app_core_data_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! app/core/data.service */ 3943);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 7716);
+
 
 
 
 let AddBookComponent = class AddBookComponent {
-    constructor() { }
+    constructor(dataService) {
+        this.dataService = dataService;
+    }
     ngOnInit() { }
     saveBook(formValues) {
         let newBook = formValues;
         newBook.bookID = 0;
         console.log(newBook);
-        console.warn('Save new book not yet implemented.');
+        this.dataService.addBook(newBook)
+            .subscribe((data) => console.log(data), (err) => console.log(err));
     }
 };
-AddBookComponent.ctorParameters = () => [];
-AddBookComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_1__.__decorate)([
-    (0,_angular_core__WEBPACK_IMPORTED_MODULE_2__.Component)({
+AddBookComponent.ctorParameters = () => [
+    { type: app_core_data_service__WEBPACK_IMPORTED_MODULE_1__.DataService }
+];
+AddBookComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_3__.Component)({
         selector: 'app-add-book',
         template: _raw_loader_add_book_component_html__WEBPACK_IMPORTED_MODULE_0__.default
     })
@@ -337,10 +344,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "DataService": () => (/* binding */ DataService)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 4762);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 7716);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! tslib */ 4762);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/core */ 7716);
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common/http */ 1841);
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs/operators */ 8002);
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs/operators */ 8307);
 /* harmony import */ var app_data__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! app/data */ 8387);
+
 
 
 
@@ -370,14 +380,37 @@ let DataService = class DataService {
                 'Authorization': 'my-token'
             })
         });
-        // return allBooks.find(book => book.bookID === id);
+    }
+    getOldBookById(id) {
+        return this.http.get(`api/books/${id}`)
+            .pipe((0,rxjs_operators__WEBPACK_IMPORTED_MODULE_2__.map)(b => ({
+            bookTitle: b.title,
+            year: b.publicationYear
+        })), (0,rxjs_operators__WEBPACK_IMPORTED_MODULE_3__.tap)(classicBook => console.log(classicBook)));
+    }
+    addBook(newBook) {
+        return this.http.post(`api/books/`, newBook, {
+            headers: new _angular_common_http__WEBPACK_IMPORTED_MODULE_1__.HttpHeaders({
+                'Content-Type': 'application/json'
+            })
+        });
+    }
+    updateBook(updatedBook) {
+        return this.http.put(`api/books/${updatedBook.bookID}`, updatedBook, {
+            headers: new _angular_common_http__WEBPACK_IMPORTED_MODULE_1__.HttpHeaders({
+                'Content-Type': 'application/json'
+            })
+        });
+    }
+    deleteBook(bookID) {
+        return this.http.delete(`api/books/${bookID}`);
     }
 };
 DataService.ctorParameters = () => [
     { type: _angular_common_http__WEBPACK_IMPORTED_MODULE_1__.HttpClient }
 ];
-DataService = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([
-    (0,_angular_core__WEBPACK_IMPORTED_MODULE_3__.Injectable)({
+DataService = (0,tslib__WEBPACK_IMPORTED_MODULE_4__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_5__.Injectable)({
         providedIn: 'root'
     })
 ], DataService);
@@ -420,7 +453,11 @@ let DashboardComponent = class DashboardComponent {
         this.title.setTitle(`Book Tracker`);
     }
     deleteBook(bookID) {
-        console.warn(`Delete book not yet implemented (bookID: ${bookID}).`);
+        this.dataService.deleteBook(bookID)
+            .subscribe((data) => {
+            let index = this.allBooks.findIndex(book => book.bookID === bookID);
+            this.allBooks.splice(index, 1);
+        }, (err) => console.log(err));
     }
     deleteReader(readerID) {
         console.warn(`Delete reader not yet implemented (readerID: ${readerID}).`);
@@ -500,12 +537,15 @@ let EditBookComponent = class EditBookComponent {
         let bookID = parseInt(this.route.snapshot.params['id']);
         this.dataService.getBookById(bookID)
             .subscribe((data) => this.selectedBook = data, (err) => console.log(err), () => console.log('All complete returning selected book'));
+        this.dataService.getOldBookById(bookID)
+            .subscribe((data) => console.log(`Old book title: ${data.bookTitle}`));
     }
     setMostPopular() {
         this.dataService.setMostPopularBook(this.selectedBook);
     }
     saveChanges() {
-        console.warn('Save changes to book not yet implemented.');
+        this.dataService.updateBook(this.selectedBook)
+            .subscribe((data) => console.log(`${this.selectedBook} updated successfully.`), (err) => console.log(err));
     }
 };
 EditBookComponent.ctorParameters = () => [
