@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
@@ -36,12 +36,7 @@ export class DataService {
   }
 
   getBookById(id: number): Observable<Book> {
-    return this.http.get<Book>(`api/books/${id}`, {
-      headers: new HttpHeaders({
-        'Accept': 'application/json',
-        'Authorization': 'my-token'
-      })
-    })
+    return this.http.get<Book>(`api/books/${id}`)
   }
 
   getOldBookById(id:number): Observable<OldBook>{
@@ -56,19 +51,12 @@ export class DataService {
   }
 
   addBook(newBook: Book):Observable<Book>{
-    return this.http.post<Book>(`api/books/`, newBook, {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      }) 
-    })
+    return this.http.post<Book>(`api/books/`, newBook)
   }
 
   updateBook(updatedBook: Book):Observable<void>{
-    return this.http.put<void>(`api/books/${updatedBook.bookID}`, updatedBook, {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      }) 
-    })
+    return this.http.put<void>(`api/books/${updatedBook.bookID}`, updatedBook) 
+    
   }
 
   deleteBook(bookID: number): Observable<void>{
