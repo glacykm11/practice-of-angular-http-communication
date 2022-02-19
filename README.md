@@ -1,3 +1,3 @@
-# Angular HTTP Communication
+# Angular HTTP Communication 
 
-This is a practice of a Pluralsight course titled *Angular HTTP Communication*. 
+Essa é uma prática do curso da PluralSight chamado *Angular HTTP Communication*
