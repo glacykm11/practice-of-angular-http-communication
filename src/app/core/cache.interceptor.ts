@@ -5,13 +5,19 @@ import { tap } from 'rxjs/operators';
 
 import { HttpCacheService } from "./http-cache.service";
 
+export const CACHEABLE = new HttpContextToken (() => true);
 @Injectable()
 export class CacheInterceptor implements HttpInterceptor {
     
     constructor(private cacheService: HttpCacheService){}
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        
+
+        //only cache requests configured to be cacheable
+        if(!req.context.get(CACHEABLE)){
+            return next.handle(req);
+        }
+
         //pass along non-cacheable requests anda invalidate cache
         if (req.method !== 'GET'){
             console.log(`Invalidando cache: ${req.method} ${req.url}`);
@@ -30,7 +36,6 @@ export class CacheInterceptor implements HttpInterceptor {
         }
 
         //send request to server and add response to cache
-
         return next.handle(req)
          .pipe(
              tap(event => {

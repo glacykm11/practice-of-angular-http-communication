@@ -1,3 +1,4 @@
+import { CACHEABLE } from './cache.interceptor';
 import { CONTENT_TYPE } from './add-header.interceptor';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpContext, HttpErrorResponse } from '@angular/common/http';
@@ -33,7 +34,7 @@ export class DataService {
 
   getAllBooks(): Observable<Book[] | BookTrackerError> {
     return this.http.get<Book[]>('api/books', {
-      context: new HttpContext().set(CONTENT_TYPE, 'application/xml')
+      context: new HttpContext().set(CACHEABLE, true)
     })
      .pipe(
        catchError(err => this.handleHttpError(err))
